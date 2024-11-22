@@ -1,0 +1,27 @@
+{
+  "name": "auto-sql",
+  "version": "1.0.0",
+  "description": "A library to dynamically manage database schemas and fetch data.",
+  "main": "src/index.js",
+  "bin": {
+    "autosql": "./src/cli.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/cli.js"
+  },
+  "keywords": [
+    "database",
+    "schema",
+    "mysql",
+    "data-fetch"
+  ],
+  "author": "Mawuli Stephen",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "mongoose": "^8.8.2",
+    "mysql2": "^3.0.0",
+    "yargs": "^17.7.2"
+  }
+}
