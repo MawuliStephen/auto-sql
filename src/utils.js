@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const initializeDirectories = (baseDir = 'auto-sql') => {
+const initializeDirectories = (baseDir = 'fastsqli') => {
     // Define the folder structure
     const dataPath = path.join(baseDir, 'data');
     const schemaPath = path.join(baseDir, 'schema');

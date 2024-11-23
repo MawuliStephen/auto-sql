@@ -64,7 +64,7 @@ yargs(hideBin(process.argv))
                     alias: 'b',
                     type: 'string',
                     description: 'Base directory for storing schema and data files',
-                    default: 'auto-sql',
+                    default: 'fastsqli',
                 })
                 .option('host', {
                     alias: 'h',
@@ -98,7 +98,7 @@ yargs(hideBin(process.argv))
                     alias: 'b',
                     type: 'string',
                     description: 'Base directory for storing schema and data files',
-                    default: 'auto-sql',
+                    default: 'fastsqli',
                 })
                 .option('host', {
                     alias: 'h',

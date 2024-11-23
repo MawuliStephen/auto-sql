@@ -16,9 +16,7 @@ const fetchDataFromTables = async (connection, baseDir = 'auto-sql') => {
         const filePath = path.join(dataPath, `${tableName}.json`);
         fs.writeFileSync(filePath, JSON.stringify(rows, null, 4), 'utf8');
         console.log(`Data saved for table ${tableName} at ${filePath}`);
-    }
-
-    
+    }    
 };
 
 module.exports = { fetchDataFromTables };

@@ -1,10 +1,10 @@
-## **auto-sql CLI Tool Documentation**
+## **fastsqli CLI Tool Documentation**
 
 ---
 
 ### **Overview**
 
-The **auto-sql** library simplifies the management of database schemas and data extraction for MySQL databases. It helps users dynamically create tables, fetch data, and update schema configurations, all within a convenient CLI tool. **auto-sql** facilitates easier handling of SQL databases alongside MongoDB-like model definitions, providing an efficient approach to schema migrations, data extraction, and JSON exports.
+The **fastsqli** library simplifies the management of database schemas and data extraction for MySQL databases. It helps users dynamically create tables, fetch data, and update schema configurations, all within a convenient CLI tool. **fastsqli** facilitates easier handling of SQL databases alongside MongoDB-like model definitions, providing an efficient approach to schema migrations, data extraction, and JSON exports.
 
 ---
 
@@ -12,7 +12,7 @@ The **auto-sql** library simplifies the management of database schemas and data 
 
 ```
 project/
-|-- auto-sql/
+|-- fastsqli/
     |-- createmodel/     # Directory for MongoDB model files that create new SQL tables
     |-- data/            # Holds data tables in JSON format
     |-- schema/          # Contains schema configuration files and models
@@ -22,7 +22,7 @@ project/
 
 ### **Directory Breakdown**
 
-#### **`auto-sql/createmodel/`**
+#### **`fastsqli/createmodel/`**
 
 This folder contains MongoDB model files, which define the structure of new models. These models are used to automatically generate corresponding tables in the SQL database.
 
@@ -47,7 +47,7 @@ module.exports = mongoose.model('Test', testSchema);
 
 ---
 
-#### **`auto-sql/data/`**
+#### **`fastsqli/data/`**
 
 This directory holds data tables in JSON format. These JSON files represent data extracted from SQL tables and can be used for exporting or manipulating data in a portable format.
 
@@ -66,7 +66,7 @@ This directory holds data tables in JSON format. These JSON files represent data
 
 ---
 
-#### **`auto-sql/schema/`**
+#### **`fastsqli/schema/`**
 
 Contains schema configuration files that define the structure and relationships of database tables.
 
@@ -111,7 +111,7 @@ This file represents a table with its columns, types, nullable attributes, and a
 
 ---
 
-#### **`auto-sql/schema/models/`**
+#### **`fastsqli/schema/models/`**
 
 Contains MongoDB-like models for each table, helping structure the schema and assisting in the table creation process.
 
@@ -148,7 +148,7 @@ For the `test` table, the structure is as follows:
 
 ---
 
-### **Features of auto-sql**
+### **Features of fastsqli**
 
 1. **Dynamic Table Creation (via Mongoose Models)**
    The `createmodel` directory contains MongoDB-like model definitions that, when executed, will automatically create the corresponding SQL tables in your database.
@@ -165,16 +165,16 @@ For the `test` table, the structure is as follows:
 
 #### **Installation**
 
-To install **auto-sql**, run the following npm command:
+To install **fastsqli**, run the following npm command:
 
 ```bash
-npm install -g auto-sql
+npm install -g fastsqli
 ```
 
 Alternatively, you can install it locally within your project:
 
 ```bash
-npm install --save-dev auto-sql
+npm install --save-dev fastsqli
 ```
 
 #### **Configuration**
@@ -202,11 +202,11 @@ There are two main commands available: **migrate** and **fetch-data**.
    **Usage:**
 
    ```bash
-   auto-sql migrate --baseDir <directory> --host <db_host> --user <db_user> --password <db_password> --database <db_name>
+   fastsqli migrate --baseDir <directory> --host <db_host> --user <db_user> --password <db_password> --database <db_name>
    ```
 
    **Options:**
-   - `--baseDir` or `-b`: Directory for storing schema and data files (default is `auto-sql`).
+   - `--baseDir` or `-b`: Directory for storing schema and data files (default is `fastsqli`).
    - `--host` or `-h`: Database host (default is `localhost`).
    - `--user` or `-u`: Database username.
    - `--password` or `-p`: Database password.
@@ -215,7 +215,7 @@ There are two main commands available: **migrate** and **fetch-data**.
    **Example:**
 
    ```bash
-   auto-sql migrate --baseDir ./auto-sql --host localhost --user root --password mysecretpassword --database mydatabase
+   fastsqli migrate --baseDir ./fastsqli --host localhost --user root --password mysecretpassword --database mydatabase
    ```
 
    This command will start the schema migration process and generate the necessary schema files.
@@ -226,11 +226,11 @@ There are two main commands available: **migrate** and **fetch-data**.
    **Usage:**
 
    ```bash
-   auto-sql fetch-data --baseDir <directory> --host <db_host> --user <db_user> --password <db_password> --database <db_name>
+   fastsqli fetch-data --baseDir <directory> --host <db_host> --user <db_user> --password <db_password> --database <db_name>
    ```
 
    **Options:**
-   - `--baseDir` or `-b`: Directory for storing schema and data files (default is `auto-sql`).
+   - `--baseDir` or `-b`: Directory for storing schema and data files (default is `fastsqli`).
    - `--host` or `-h`: Database host (default is `localhost`).
    - `--user` or `-u`: Database username.
    - `--password` or `-p`: Database password.
@@ -239,7 +239,7 @@ There are two main commands available: **migrate** and **fetch-data**.
    **Example:**
 
    ```bash
-   auto-sql fetch-data --baseDir ./auto-sql --host localhost --user root --password mysecretpassword --database mydatabase
+   fastsqli fetch-data --baseDir ./fastsqli --host localhost --user root --password mysecretpassword --database mydatabase
    ```
 
    This will fetch the data from all tables in the specified database and save it as JSON files in the given directory.
@@ -251,6 +251,6 @@ There are two main commands available: **migrate** and **fetch-data**.
 To check the version or get help on the available commands, use the following commands:
 
 ```bash
-auto-sql --version
-auto-sql --help
+fastsqli --version
+fastsqli --help
 ```

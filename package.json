@@ -1,10 +1,10 @@
 {
-  "name": "auto-sql",
+  "name": "fastsqli",
   "version": "1.0.0",
   "description": "A library to dynamically manage database schemas and fetch data.",
   "main": "src/index.js",
   "bin": {
-    "autosql": "./src/cli.js"
+    "fastsqli": "./src/cli.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
