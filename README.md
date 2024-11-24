@@ -1,3 +1,5 @@
+---
+
 ## **fastsqli CLI Tool Documentation**
 
 ---
@@ -150,13 +152,13 @@ For the `test` table, the structure is as follows:
 
 ### **Features of fastsqli**
 
-1. **Dynamic Table Creation (via Mongoose Models)**
+1. **Dynamic Table Creation (via Mongoose Models)**  
    The `createmodel` directory contains MongoDB-like model definitions that, when executed, will automatically create the corresponding SQL tables in your database.
 
-2. **Schema Representation with `schema.json`**
+2. **Schema Representation with `schema.json`**  
    The `schema.json` file in the `schema` folder represents your database schema, which includes tables, columns, data types, and relationships. This provides a blueprint for creating or updating your schema in the SQL database.
 
-3. **Data Extraction in JSON Format**
+3. **Data Extraction in JSON Format**  
    You can extract data from your SQL tables and save it in JSON format using the scripts in the `data` directory. This functionality is useful for exporting data or generating datasets for further processing.
 
 ---
@@ -194,7 +196,7 @@ These values can also be passed as flags in the CLI commands.
 
 #### **CLI Commands**
 
-There are two main commands available: **migrate** and **fetch-data**.
+The CLI tool offers three main commands:
 
 1. **Migrate Command**  
    This command generates or updates the database schema based on the provided configuration files.
@@ -226,7 +228,7 @@ There are two main commands available: **migrate** and **fetch-data**.
    **Usage:**
 
    ```bash
-   fastsqli fetch-data --baseDir <directory> --host <db_host> --user <db_user> --password <db_password> --database <db_name>
+   fastsqli fetch --baseDir <directory> --host <db_host> --user <db_user> --password <db_password> --database <db_name>
    ```
 
    **Options:**
@@ -239,10 +241,35 @@ There are two main commands available: **migrate** and **fetch-data**.
    **Example:**
 
    ```bash
-   fastsqli fetch-data --baseDir ./fastsqli --host localhost --user root --password mysecretpassword --database mydatabase
+   fastsqli fetch --baseDir ./fastsqli --host localhost --user root --password mysecretpassword --database mydatabase
    ```
 
    This will fetch the data from all tables in the specified database and save it as JSON files in the given directory.
+
+3. **Push Data Command**  
+   This command pushes data from JSON files to the database tables.
+
+   **Usage:**
+
+   ```bash
+   fastsqli push --table <table_name> --baseDir <directory> --host <db_host> --user <db_user> --password <db_password> --database <db_name>
+   ```
+
+   **Options:**
+   - `--table` or `-t`: The table to push data to (use `"all"` for all tables).
+   - `--baseDir` or `-b`: Directory for storing schema and data files (default is `fastsqli`).
+   - `--host` or `-h`: Database host (default is `localhost`).
+   - `--user` or `-u`: Database username.
+   - `--password` or `-p`: Database password.
+   - `--database` or `-d`: Database name.
+
+   **Example:**
+
+   ```bash
+   fastsqli push --table test --baseDir ./fastsqli --host localhost --user root --password mysecretpassword --database mydatabase
+   ```
+
+   This will push the data from the specified JSON file to the given table in the database.
 
 ---
 
@@ -254,3 +281,5 @@ To check the version or get help on the available commands, use the following co
 fastsqli --version
 fastsqli --help
 ```
+
+---

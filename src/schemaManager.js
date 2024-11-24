@@ -1,9 +1,10 @@
+// schemaManager.js
 const fs = require('fs');
 const path = require('path');
 const { initializeDirectories } = require('./utils');
-
 const vm = require('vm');
 const mongoose = require('mongoose');
+
 
 const createTableFromModel = async (connection, modelFilePath) => {
     const modelCode = fs.readFileSync(modelFilePath, 'utf8');
@@ -52,8 +53,6 @@ const createTableFromModel = async (connection, modelFilePath) => {
     await connection.query(createTableSQL);
 };
 
-
-
 const processCreateModelFiles = async (connection, createmodelPath) => {
     const modelFiles = fs.readdirSync(createmodelPath).filter((file) => file.endsWith('.js'));
 
@@ -63,6 +62,61 @@ const processCreateModelFiles = async (connection, createmodelPath) => {
     }
 };
 
+//we want a funtion that will the modelpath to create table in the database  if it does exist? 
+
+// const createModelFile = (tableName, columns, modelsPath) => {
+//     const modelPath = path.join(modelsPath, `${tableName}.js`);
+//     if (fs.existsSync(modelPath)) {
+//         console.log(`Model already exists for table: ${tableName}`);
+//         return;
+//     }
+
+//     // Create Mongoose schema fields from columns
+//     const fields = columns.map(col => {
+//         let required = col.column_type !== 'VARCHAR' && col.is_nullable === 'NO' ? 'required: true' : '';
+//         return `        ${col.column_name}: { type: '${col.column_type}', ${required} }`;
+//     }).join(',\n');
+
+//     // Create SQL table representation with aligned columns
+//     const tableRepresentation = columns.map(col => {
+//         let attributes = col.is_nullable === 'NO' ? 'NOT NULL' : '';
+//         if (col.column_name === 'id') {
+//             attributes = 'PRIMARY KEY, AUTO_INCREMENT';
+//         }
+//         // Format the columns for better visual representation
+//         return `| ${col.column_name.padEnd(25)}| ${col.column_type.padEnd(10)}| ${attributes.padEnd(20)}|`;
+//     }).join('\n');
+
+//     // Construct Mongoose model file content
+//     const modelContent = `
+// const mongoose = require('mongoose');
+
+// const ${tableName}Schema = new mongoose.Schema({
+// ${fields}
+// }, { timestamps: true });
+
+// module.exports = mongoose.model('${tableName}', ${tableName}Schema);
+
+
+
+// /* 
+// // ===========================
+//     Table: ${tableName}
+// // ===========================
+
+// Columns:
+// --------------------------------------------------------------
+// ${'Column Name'.padEnd(25)}| {'Type'.padEnd(10)}| {'Attributes'.padEnd(20)}
+// --------------------------------------------------------------
+// ${tableRepresentation}
+// --------------------------------------------------------------
+// */
+//     `;
+
+//     // Write the model file
+//     fs.writeFileSync(modelPath, modelContent, 'utf8');
+//     console.log(`Model file created for table: ${tableName} at ${modelPath}`);
+// };
 
 const createModelFile = (tableName, columns, modelsPath) => {
     const modelPath = path.join(modelsPath, `${tableName}.js`);
@@ -71,24 +125,45 @@ const createModelFile = (tableName, columns, modelsPath) => {
         return;
     }
 
-    // Create Mongoose schema fields from columns
-    const fields = columns.map(col => {
-        let required = col.column_type !== 'VARCHAR' && col.is_nullable === 'NO' ? 'required: true' : '';
-        return `        ${col.column_name}: { type: '${col.column_type}', ${required} }`;
-    }).join(',\n');
+    try {
+        // Create Mongoose schema fields from columns
+        const fields = columns.map(col => {
+            let required = col.column_type !== 'VARCHAR' && col.is_nullable === 'NO' ? 'required: true' : '';
+            let mongooseType;
+            
+            // Correct data type mapping
+            switch (col.column_type.toUpperCase()) {
+                case 'VARCHAR':
+                    mongooseType = 'String';
+                    break;
+                case 'INT':
+                    mongooseType = 'Number'; // Use Number for INT
+                    break;
+                case 'DATETIME':
+                    mongooseType = 'Date';
+                    break;
+                case 'TINYINT':
+                    mongooseType = 'Boolean'; // For TINYINT(1), use Boolean
+                    break;
+                default:
+                    mongooseType = 'String'; // Default to String if the type is unknown
+                    break;
+            }
 
-    // Create SQL table representation with aligned columns
-    const tableRepresentation = columns.map(col => {
-        let attributes = col.is_nullable === 'NO' ? 'NOT NULL' : '';
-        if (col.column_name === 'id') {
-            attributes = 'PRIMARY KEY, AUTO_INCREMENT';
-        }
-        // Format the columns for better visual representation
-        return `| ${col.column_name.padEnd(25)}| ${col.column_type.padEnd(10)}| ${attributes.padEnd(20)}|`;
-    }).join('\n');
+            return `        ${col.column_name}: { type: '${mongooseType}', ${required} }`;
+        }).join(',\n');
 
-    // Construct Mongoose model file content
-    const modelContent = `
+        // Create SQL table representation with aligned columns
+        const tableRepresentation = columns.map(col => {
+            let attributes = col.is_nullable === 'NO' ? 'NOT NULL' : '';
+            if (col.column_name === 'id') {
+                attributes = 'PRIMARY KEY, AUTO_INCREMENT';
+            }
+            return `| ${col.column_name.padEnd(25)}| ${col.column_type.padEnd(10)}| ${attributes.padEnd(20)}|`;
+        }).join('\n');
+
+        // Construct Mongoose model file content
+        const modelContent = `
 const mongoose = require('mongoose');
 
 const ${tableName}Schema = new mongoose.Schema({
@@ -96,7 +171,6 @@ ${fields}
 }, { timestamps: true });
 
 module.exports = mongoose.model('${tableName}', ${tableName}Schema);
-
 
 
 /* 
@@ -111,11 +185,14 @@ ${'Column Name'.padEnd(25)}| {'Type'.padEnd(10)}| {'Attributes'.padEnd(20)}
 ${tableRepresentation}
 --------------------------------------------------------------
 */
-    `;
+        `;
 
-    // Write the model file
-    fs.writeFileSync(modelPath, modelContent, 'utf8');
-    console.log(`Model file created for table: ${tableName} at ${modelPath}`);
+        // Write the model file
+        fs.writeFileSync(modelPath, modelContent, 'utf8');
+        console.log(`Model file created for table: ${tableName} at ${modelPath}`);
+    } catch (error) {
+        console.error(`Error creating model for table ${tableName}:`, error);
+    }
 };
 
 const fetchSchema = async (connection) => {
@@ -168,7 +245,7 @@ const fetchSchema = async (connection) => {
     return schema;
 };
 
-const updateSchema = async (connection, baseDir = 'auto-sql') => {
+const initializeFastsqli = async (connection, baseDir = 'fastsqli') => {
     const { schemaPath, modelsPath } = initializeDirectories(baseDir);
 
     // Define the path to the createmodel directory
@@ -195,4 +272,5 @@ const updateSchema = async (connection, baseDir = 'auto-sql') => {
     await processCreateModelFiles(connection, createmodelPath);
 };
 
-module.exports = { fetchSchema, updateSchema };
+module.exports = { fetchSchema, initializeFastsqli };
+// recreateTableFromModels

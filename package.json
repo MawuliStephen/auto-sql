@@ -7,9 +7,11 @@
     "fastsqli": "./src/cli.js"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/cli.js"
+    "start": "node src/cli.js",
+  "test": "jest"
+
   },
+
   "keywords": [
     "database",
     "schema",
@@ -22,6 +24,10 @@
     "dotenv": "^16.4.5",
     "mongoose": "^8.8.2",
     "mysql2": "^3.0.0",
+    "winston": "^3.17.0",
     "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
   }
 }
