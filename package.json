@@ -1,6 +1,6 @@
 {
   "name": "fastsqli",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A library to dynamically manage database schemas and fetch data.",
   "main": "src/index.js",
   "bin": {
