@@ -1,3 +1,5 @@
+//db.js
+
 const mysql = require('mysql2/promise');
 const { initializeDirectories } = require('./utils');
 const fs = require('fs');
@@ -21,7 +23,7 @@ const checkAndCreateTables = async (connection, modelsPath) => {
             console.log(`Table ${tableName} does not exist. Creating...`);
             // Placeholder: Add logic to parse model file and create table dynamically.
         } else {
-            console.log(`Table ${tableName} already exists.`);
+            // console.log(`Table ${tableName} already exists.`);
         }
     }
 };
@@ -29,7 +31,7 @@ const checkAndCreateTables = async (connection, modelsPath) => {
 const connectDB = async ({ host, user, password, database }) => {
     try {
         const connection = await mysql.createConnection({ host, user, password, database });
-        console.log('AutoSql connected successfully!');
+        // console.log('AutoSql connected successfully!');
 
         const { modelsPath } = initializeDirectories();
 
