@@ -6,7 +6,7 @@ const vm = require('vm');
 const mongoose = require('mongoose');
 
 
-const createTableFromModel = async (connection, modelFilePath) => {
+const crateTableFromModel = async (connection, modelFilePath) => {
     const modelCode = fs.readFileSync(modelFilePath, 'utf8');
     const script = new vm.Script(modelCode);
     const context = { require, module: {}, mongoose, console }; // Include mongoose in context
@@ -53,6 +53,241 @@ const createTableFromModel = async (connection, modelFilePath) => {
     await connection.query(createTableSQL);
 };
 
+const creTableFromModel = async (connection, modelFilePath) => {
+    const modelCode = fs.readFileSync(modelFilePath, 'utf8');
+    const script = new vm.Script(modelCode);
+    const context = { require, module: {}, mongoose, console }; // Include mongoose in context
+    script.runInNewContext(context);
+
+    const model = context.module.exports;
+    const schemaDefinition = model.schema.paths;
+
+    const tableName = model.modelName.toLowerCase();
+
+    // Filter out the `__v` and optionally `_id` fields
+    const columns = Object.entries(schemaDefinition)
+        .filter(([columnName]) => columnName !== '__v' && columnName !== '_id') // Exclude `__v` and `_id`
+        .map(([columnName, columnSchema]) => {
+            let sqlType;
+            let foreignKey = '';
+
+            switch (columnSchema.instance.toLowerCase()) {
+                case 'string':
+                    sqlType = 'VARCHAR(255)';
+                    break;
+                case 'number':
+                    sqlType = 'INT';
+                    break;
+                case 'date':
+                    sqlType = 'DATETIME';
+                    break;
+                case 'boolean':
+                    sqlType = 'TINYINT(1)';
+                    break;
+                case 'objectid':
+                    sqlType = 'CHAR(24)'; // or VARCHAR(24)
+                    if (columnSchema.options?.ref) {
+                        // Add foreign key constraint if reference is defined and points to 'id' column in `users`
+                        foreignKey = `, FOREIGN KEY (\`${columnName}\`) REFERENCES \`${columnSchema.options.ref.toLowerCase()}\`(\`id\`)`;
+                    }
+                    break;
+                default:
+                    throw new Error(`Unsupported type for column ${columnName}: ${columnSchema.instance}`);
+            }
+
+            const notNull = columnSchema.options?.required ? 'NOT NULL' : '';
+            return `\`${columnName}\` ${sqlType} ${notNull}${foreignKey}`;
+        });
+
+    const createTableSQL = `
+        CREATE TABLE IF NOT EXISTS \`${tableName}\` (
+            ${columns.join(',\n')}
+        );
+    `;
+
+    console.log(`Creating table: ${tableName}`);
+    await connection.query(createTableSQL);
+};
+
+const eateTableFromModel = async (connection, modelFilePath) => {
+    const modelCode = fs.readFileSync(modelFilePath, 'utf8');
+    const script = new vm.Script(modelCode);
+    const context = { require, module: {}, mongoose, console };
+    script.runInNewContext(context);
+
+    const model = context.module.exports;
+    const schemaDefinition = model.schema.paths;
+
+    const tableName = model.modelName.toLowerCase();
+
+    const columns = Object.entries(schemaDefinition)
+        .filter(([columnName]) => columnName !== '__v' && columnName !== '_id')
+        .map(([columnName, columnSchema]) => {
+            let sqlType;
+            let foreignKey = '';
+
+            switch (columnSchema.instance.toLowerCase()) {
+                case 'string':
+                    sqlType = 'VARCHAR(255)';
+                    break;
+                case 'number':
+                    sqlType = 'INT';
+                    break;
+                case 'date':
+                    sqlType = 'DATETIME';
+                    break;
+                case 'boolean':
+                    sqlType = 'TINYINT(1)';
+                    break;
+                case 'objectid':
+                    sqlType = 'INT'; // Change to INT for user_id to match the users table `id`
+                    if (columnSchema.options?.ref) {
+                        foreignKey = `, FOREIGN KEY (\`${columnName}\`) REFERENCES \`${columnSchema.options.ref.toLowerCase()}\`(\`id\`)`;
+                    }
+                    break;
+                default:
+                    throw new Error(`Unsupported type for column ${columnName}: ${columnSchema.instance}`);
+            }
+
+            const notNull = columnSchema.options?.required ? 'NOT NULL' : '';
+            return `\`${columnName}\` ${sqlType} ${notNull}${foreignKey}`;
+        });
+
+    const createTableSQL = `
+        CREATE TABLE IF NOT EXISTS \`${tableName}\` (
+            ${columns.join(',\n')}
+        );
+    `;
+
+    console.log(`Creating table: ${tableName}`);
+    await connection.query(createTableSQL);
+};
+
+const ateTableFromModel = async (connection, modelFilePath) => {
+    const modelCode = fs.readFileSync(modelFilePath, 'utf8');
+    const script = new vm.Script(modelCode);
+    const context = { require, module: {}, mongoose, console };
+    script.runInNewContext(context);
+
+    const model = context.module.exports;
+    const schemaDefinition = model.schema.paths;
+
+    const tableName = model.modelName.toLowerCase();
+
+    const columns = Object.entries(schemaDefinition)
+        .filter(([columnName]) => columnName !== '__v' && columnName !== '_id')
+        .map(([columnName, columnSchema]) => {
+            let sqlType;
+            let foreignKey = '';
+
+            switch (columnSchema.instance.toLowerCase()) {
+                case 'string':
+                    sqlType = 'VARCHAR(255)';
+                    break;
+                case 'number':
+                    sqlType = 'INT';
+                    if (columnName === 'id') {
+                        // Add primary key for `id`
+                        sqlType += ' PRIMARY KEY AUTO_INCREMENT';
+                    }
+                    if (columnName === 'user_id' && columnSchema.options?.ref) {
+                        // Add foreign key constraint for `user_id`
+                        foreignKey = `, FOREIGN KEY (\`${columnName}\`) REFERENCES \`${columnSchema.options.ref.toLowerCase()}\`(\`id\`)`;
+                    }
+                    break;
+                case 'date':
+                    sqlType = 'DATETIME';
+                    break;
+                case 'boolean':
+                    sqlType = 'TINYINT(1)';
+                    break;
+                default:
+                    throw new Error(`Unsupported type for column ${columnName}: ${columnSchema.instance}`);
+            }
+
+            const notNull = columnSchema.options?.required ? 'NOT NULL' : '';
+            return `\`${columnName}\` ${sqlType} ${notNull}${foreignKey}`;
+        });
+
+    const createTableSQL = `
+        CREATE TABLE IF NOT EXISTS \`${tableName}\` (
+            ${columns.join(',\n')}
+        );
+    `;
+
+    console.log(`Creating table: ${tableName}`);
+    await connection.query(createTableSQL);
+};
+
+const createTableFromModel = async (connection, modelFilePath) => {
+    const modelCode = fs.readFileSync(modelFilePath, 'utf8');
+    const script = new vm.Script(modelCode);
+    const context = { require, module: {}, mongoose, console };
+    script.runInNewContext(context);
+
+    const model = context.module.exports;
+    const schemaDefinition = model.schema.paths;
+
+    const tableName = model.modelName.toLowerCase();
+
+    const columns = Object.entries(schemaDefinition)
+        .filter(([columnName]) => columnName !== '__v' && columnName !== '_id')
+        .map(([columnName, columnSchema]) => {
+            let sqlType;
+            let foreignKey = '';
+
+            switch (columnSchema.instance.toLowerCase()) {
+                case 'string':
+                    sqlType = 'VARCHAR(255)';
+                    break;
+                case 'number':
+                    sqlType = 'INT';
+                    if (columnName === 'id') {
+                        // Add primary key for `id`
+                        sqlType += ' PRIMARY KEY AUTO_INCREMENT';
+                    }
+                    if (columnName === 'user_id' && columnSchema.options?.ref) {
+                        // Add foreign key constraint for `user_id`
+                        foreignKey = `, FOREIGN KEY (\`${columnName}\`) REFERENCES \`${columnSchema.options.ref.toLowerCase()}\`(\`id\`)`;
+                    }
+                    break;
+                case 'date':
+                    sqlType = 'DATETIME';
+                    break;
+                case 'boolean':
+                    sqlType = 'TINYINT(1)';
+                    break;
+                case 'objectid':
+                    // Map ObjectId to INT for user_id
+                    if (columnName === 'user_id') {
+                        sqlType = 'INT';
+                        if (columnSchema.options?.ref) {
+                            foreignKey = `, FOREIGN KEY (\`${columnName}\`) REFERENCES \`${columnSchema.options.ref.toLowerCase()}\`(\`id\`)`;
+                        }
+                    } else {
+                        throw new Error(`Unsupported type for column ${columnName}: ${columnSchema.instance}`);
+                    }
+                    break;
+                default:
+                    throw new Error(`Unsupported type for column ${columnName}: ${columnSchema.instance}`);
+            }
+
+            const notNull = columnSchema.options?.required ? 'NOT NULL' : '';
+            return `\`${columnName}\` ${sqlType} ${notNull}${foreignKey}`;
+        });
+
+    const createTableSQL = `
+        CREATE TABLE IF NOT EXISTS \`${tableName}\` (
+            ${columns.join(',\n')}
+        );
+    `;
+
+    console.log(`Creating table: ${tableName}`);
+    await connection.query(createTableSQL);
+};
+
+
+
 const processCreateModelFiles = async (connection, createmodelPath) => {
     const modelFiles = fs.readdirSync(createmodelPath).filter((file) => file.endsWith('.js'));
 
@@ -62,63 +297,8 @@ const processCreateModelFiles = async (connection, createmodelPath) => {
     }
 };
 
-//we want a funtion that will the modelpath to create table in the database  if it does exist? 
 
-// const createModelFile = (tableName, columns, modelsPath) => {
-//     const modelPath = path.join(modelsPath, `${tableName}.js`);
-//     if (fs.existsSync(modelPath)) {
-//         console.log(`Model already exists for table: ${tableName}`);
-//         return;
-//     }
-
-//     // Create Mongoose schema fields from columns
-//     const fields = columns.map(col => {
-//         let required = col.column_type !== 'VARCHAR' && col.is_nullable === 'NO' ? 'required: true' : '';
-//         return `        ${col.column_name}: { type: '${col.column_type}', ${required} }`;
-//     }).join(',\n');
-
-//     // Create SQL table representation with aligned columns
-//     const tableRepresentation = columns.map(col => {
-//         let attributes = col.is_nullable === 'NO' ? 'NOT NULL' : '';
-//         if (col.column_name === 'id') {
-//             attributes = 'PRIMARY KEY, AUTO_INCREMENT';
-//         }
-//         // Format the columns for better visual representation
-//         return `| ${col.column_name.padEnd(25)}| ${col.column_type.padEnd(10)}| ${attributes.padEnd(20)}|`;
-//     }).join('\n');
-
-//     // Construct Mongoose model file content
-//     const modelContent = `
-// const mongoose = require('mongoose');
-
-// const ${tableName}Schema = new mongoose.Schema({
-// ${fields}
-// }, { timestamps: true });
-
-// module.exports = mongoose.model('${tableName}', ${tableName}Schema);
-
-
-
-// /* 
-// // ===========================
-//     Table: ${tableName}
-// // ===========================
-
-// Columns:
-// --------------------------------------------------------------
-// ${'Column Name'.padEnd(25)}| {'Type'.padEnd(10)}| {'Attributes'.padEnd(20)}
-// --------------------------------------------------------------
-// ${tableRepresentation}
-// --------------------------------------------------------------
-// */
-//     `;
-
-//     // Write the model file
-//     fs.writeFileSync(modelPath, modelContent, 'utf8');
-//     console.log(`Model file created for table: ${tableName} at ${modelPath}`);
-// };
-
-const createModelFile = (tableName, columns, modelsPath) => {
+const eateModelFile = (tableName, columns, modelsPath) => {
     const modelPath = path.join(modelsPath, `${tableName}.js`);
     if (fs.existsSync(modelPath)) {
         console.log(`Model already exists for table: ${tableName}`);
@@ -194,6 +374,189 @@ ${tableRepresentation}
         console.error(`Error creating model for table ${tableName}:`, error);
     }
 };
+
+const ateModelFile = (tableName, columns, modelsPath) => {
+    const modelPath = path.join(modelsPath, `${tableName}.js`);
+    if (fs.existsSync(modelPath)) {
+        console.log(`Model already exists for table: ${tableName}`);
+        return;
+    }
+
+    try {
+        // Create Mongoose schema fields from columns
+        const fields = columns.map(col => {
+            let required = col.column_type !== 'VARCHAR' && col.is_nullable === 'NO' ? 'required: true' : '';
+            let mongooseType;
+            let ref = ''; // Add ref attribute for foreign keys
+
+            // Correct data type mapping
+            switch (col.column_type.toUpperCase()) {
+                case 'VARCHAR':
+                    mongooseType = 'String';
+                    break;
+                case 'INT':
+                    mongooseType = 'Number'; // Use Number for INT
+                    break;
+                case 'DATETIME':
+                    mongooseType = 'Date';
+                    break;
+                case 'TINYINT':
+                    mongooseType = 'Boolean'; // For TINYINT(1), use Boolean
+                    break;
+                default:
+                    mongooseType = 'String'; // Default to String if the type is unknown
+                    break;
+            }
+
+            // Check if the column should be a foreign key
+            if (col.column_name.toLowerCase().endsWith('_id') && col.column_name !== 'id') {
+                // Set the `ref` to the table name in lower case, without `_id` suffix
+                ref = `, ref: '${col.column_name.replace(/_id$/, '')}'`;
+            }
+
+            return `        ${col.column_name}: { type: '${mongooseType}'${ref}, ${required} }`;
+        }).join(',\n');
+
+        // Create SQL table representation with aligned columns
+        const tableRepresentation = columns.map(col => {
+            let attributes = col.is_nullable === 'NO' ? 'NOT NULL' : '';
+            if (col.column_name === 'id') {
+                attributes = 'PRIMARY KEY, AUTO_INCREMENT';
+            }
+            // Indicate foreign key relationships in the table representation
+            if (col.column_name.toLowerCase().endsWith('_id') && col.column_name !== 'id') {
+                attributes += `, FOREIGN KEY (${col.column_name}) REFERENCES ${col.column_name.replace(/_id$/, '')}(id)`;
+            }
+            return `| ${col.column_name.padEnd(25)}| ${col.column_type.padEnd(10)}| ${attributes.padEnd(20)}|`;
+        }).join('\n');
+
+        // Construct Mongoose model file content
+        const modelContent = `
+const mongoose = require('mongoose');
+
+const ${tableName}Schema = new mongoose.Schema({
+${fields}
+}, { timestamps: true });
+
+module.exports = mongoose.model('${tableName}', ${tableName}Schema);
+
+
+/* 
+// ===========================
+    Table: ${tableName}
+// ===========================
+
+Columns:
+--------------------------------------------------------------
+${'Column Name'.padEnd(25)}| {'Type'.padEnd(10)}| {'Attributes'.padEnd(20)}
+--------------------------------------------------------------
+${tableRepresentation}
+--------------------------------------------------------------
+*/
+        `;
+
+        // Write the model file
+        fs.writeFileSync(modelPath, modelContent, 'utf8');
+        console.log(`Model file created for table: ${tableName} at ${modelPath}`);
+    } catch (error) {
+        console.error(`Error creating model for table ${tableName}:`, error);
+    }
+};
+
+const createModelFile = (tableName, columns, modelsPath) => {
+    const modelPath = path.join(modelsPath, `${tableName}.js`);
+    if (fs.existsSync(modelPath)) {
+        console.log(`Model already exists for table: ${tableName}`);
+        return;
+    }
+
+    try {
+        // Create Mongoose schema fields from columns
+        const fields = columns.map(col => {
+            let required = col.column_type !== 'VARCHAR' && col.is_nullable === 'NO' ? 'required: true' : '';
+            let mongooseType;
+            let ref = ''; // Add ref attribute for foreign keys
+
+            // Correct data type mapping
+            switch (col.column_type.toUpperCase()) {
+                case 'VARCHAR':
+                    mongooseType = 'String';
+                    break;
+                case 'INT':
+                    mongooseType = 'Number'; // Use Number for INT
+                    break;
+                case 'DATETIME':
+                    mongooseType = 'Date';
+                    break;
+                case 'TINYINT':
+                    mongooseType = 'Boolean'; // For TINYINT(1), use Boolean
+                    break;
+                default:
+                    mongooseType = 'String'; // Default to String if the type is unknown
+                    break;
+            }
+
+            // Check if the column should be a foreign key
+            if (col.column_name.toLowerCase().endsWith('_id') && col.column_name !== 'id') {
+                // Set the `ref` to the table name in lower case, without `_id` suffix
+                ref = `, ref: '${col.column_name.replace(/_id$/, '')}'`;
+            }
+
+            // Special handling for the `id` column to set as primary key and auto-increment
+            if (col.column_name === 'id') {
+                return `        ${col.column_name}: { type: '${mongooseType}', required: true, autoIncrement: true }`;
+            }
+
+            return `        ${col.column_name}: { type: '${mongooseType}'${ref}, ${required} }`;
+        }).join(',\n');
+
+        // Create SQL table representation with aligned columns
+        const tableRepresentation = columns.map(col => {
+            let attributes = col.is_nullable === 'NO' ? 'NOT NULL' : '';
+            if (col.column_name === 'id') {
+                attributes = 'PRIMARY KEY, AUTO_INCREMENT';
+            }
+            // Indicate foreign key relationships in the table representation
+            if (col.column_name.toLowerCase().endsWith('_id') && col.column_name !== 'id') {
+                attributes += `, FOREIGN KEY (${col.column_name}) REFERENCES ${col.column_name.replace(/_id$/, '')}(id)`;
+            }
+            return `| ${col.column_name.padEnd(25)}| ${col.column_type.padEnd(10)}| ${attributes.padEnd(20)}|`;
+        }).join('\n');
+
+        // Construct Mongoose model file content
+        const modelContent = `
+const mongoose = require('mongoose');
+
+const ${tableName}Schema = new mongoose.Schema({
+${fields}
+}, { timestamps: true });
+
+module.exports = mongoose.model('${tableName}', ${tableName}Schema);
+
+
+/* 
+// ===========================
+    Table: ${tableName}
+// ===========================
+
+Columns:
+--------------------------------------------------------------
+${'Column Name'.padEnd(25)}| {'Type'.padEnd(10)}| {'Attributes'.padEnd(20)}
+--------------------------------------------------------------
+${tableRepresentation}
+--------------------------------------------------------------
+*/
+        `;
+
+        // Write the model file
+        fs.writeFileSync(modelPath, modelContent, 'utf8');
+        console.log(`Model file created for table: ${tableName} at ${modelPath}`);
+    } catch (error) {
+        console.error(`Error creating model for table ${tableName}:`, error);
+    }
+};
+
+
 
 const fetchSchema = async (connection) => {
     const [rows] = await connection.query(`
